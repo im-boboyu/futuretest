@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测测你的性格像哪种食物 | 你的内在是什么口味？</title>
+    <style>
+        /* 莫兰迪马卡龙色系 */
+        :root {
+            --bg-color: #FBF9F6;
+            --primary-color: #D4A373; /* 焦糖色 */
+            --primary-dark: #B87B45;
+            --text-main: #4A4A4A;
+            --text-sub: #8A8A8A;
+            --card-bg: #FFFFFF;
+            --border-color: #EFEBE4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif; line-height: 1.6; display: flex; justify-content: center; min-height: 100vh; }
+        
+        #app { width: 100%; max-width: 480px; background: var(--bg-color); padding: 20px; display: flex; flex-direction: column; position: relative; overflow-x: hidden; }
+        
+        /* 顶部标题 */
+        .header { text-align: center; padding: 20px 0 10px; }
+        .header h1 { font-size: 20px; font-weight: 600; color: var(--primary-dark); letter-spacing: 1px; }
+        .header p { font-size: 12px; color: var(--text-sub); margin-top: 5px; }
+
+        .page { display: none; flex-direction: column; animation: fadeIn 0.4s ease; }
+        .page.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 封面 */
+        .cover { text-align: center; padding: 40px 20px; background: var(--card-bg); border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-top: 30px; border: 1px solid var(--border-color); }
+        .cover h2 { font-size: 22px; color: var(--primary-dark); margin-bottom: 20px; line-height: 1.4; }
+        .cover p { font-size: 14px; color: var(--text-sub); margin-bottom: 40px; }
+        .btn { background-color: var(--primary-color); color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 16px; font-weight: 500; width: 100%; cursor: pointer; transition: background 0.3s; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(212, 163, 115, 0.2); }
+        .btn:active { background-color: var(--primary-dark); }
+
+        /* 答题区 */
+        .quiz-header { font-size: 13px; color: var(--text-sub); margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .progress-bar { height: 6px; background: var(--border-color); border-radius: 3px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary-color); width: 0%; transition: width 0.3s ease; }
+        .question-text { font-size: 18px; font-weight: 600; margin-bottom: 25px; color: var(--text-main); }
+        .options { display: flex; flex-direction: column; gap: 15px; }
+        .option { background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px 20px; border-radius: 16px; font-size: 15px; color: var(--text-main); cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .option:active { transform: scale(0.98); }
+        .option.selected { border-color: var(--primary-color); background-color: #FDFBF7; color: var(--primary-dark); font-weight: 500; box-shadow: 0 2px 10px rgba(212, 163, 115, 0.15); }
+
+        /* 结果区 */
+        .result-card { background: var(--card-bg); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid var(--border-color); }
+        .badge-wrapper { text-align: center; }
+        .badge { font-size: 12px; color: #fff; background: #C0A080; display: inline-block; padding: 4px 14px; border-radius: 20px; margin: 0 auto 15px auto; font-weight: 500; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(192, 160, 128, 0.3); }
+        .result-title { text-align: center; font-size: 14px; color: var(--text-sub); margin-bottom: 5px; }
+        .result-name { text-align: center; font-size: 26px; font-weight: bold; color: var(--primary-dark); margin-bottom: 15px; }
+        .result-content { font-size: 14px; color: var(--text-main); line-height: 1.8; text-align: justify; }
+        .result-content p { margin-bottom: 12px; }
+        .result-content strong { color: var(--primary-dark); }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; justify-content: center; }
+        .tag { background: #FDFBF7; color: var(--primary-dark); padding: 4px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #EFEBE4; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="header">
+        <h1>你的性格像哪种食物？</h1>
+        <p>一口咬下你的内在灵魂</p>
+    </div>
+
+    <!-- 封面 -->
+    <div id="page-cover" class="page active">
+        <div class="cover">
+            <h2>如果性格有味道<br>你会是什么口味？</h2>
+            <p>15道生活细节题，用味蕾解析你的真实性格。<br>凭直觉选，肚子饿了别怪我。</p>
+            <button class="btn" onclick="startQuiz()">开始品尝</button>
+        </div>
+    </div>
+
+    <!-- 答题 -->
+    <div id="page-quiz" class="page">
+        <div class="quiz-header"><span id="q-current">1</span>/<span id="q-total">15</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="question-text" id="question-text">加载中...</div>
+        <div class="options" id="options-container"></div>
+    </div>
+
+    <!-- 结果 -->
+    <div id="page-result" class="page">
+        <div class="result-card">
+            <div class="badge-wrapper">
+                <div class="badge" id="test-count-badge">数据加载中...</div>
+            </div>
+            <div class="result-title">你的灵魂食物是</div>
+            <div class="result-name" id="res-name">食物名</div>
+            <div class="tags" id="res-tags"></div>
+            <div class="result-content" id="res-content"></div>
+        </div>
+        <button class="btn" onclick="restartQuiz()" style="margin-bottom: 30px;">再测一次</button>
+    </div>
+</div>
+
+<script>
+    // 维度：sweet(甜/亲和), spicy(辣/热情), sour(酸/独立), savory(咸苦/沉稳)
+    const questions = [
+        { q: "面对一份新菜单，你通常会先点哪种口味？", opts: [{t: "甜滋滋的，甜点才是本体", val: {sweet: 9}}, {t: "无辣不欢，越辣越上头", val: {spicy: 9}}, {t: "酸爽开胃，喜欢柠檬/百香果", val: {sour: 9}}, {t: "咸香或者醇苦，讲究原汁原味", val: {savory: 9}}] },
+        { q: "周末朋友聚会，你通常是哪种角色？", opts: [{t: "组局者，热场子小能手", val: {spicy: 8, sweet: 4}}, {t: "倾听者，情绪价值拉满的树洞", val: {sweet: 9, sour: 2}}, {t: "默默照顾大家的大管家", val: {savory: 9, sweet: 3}}, {t: "偶尔参与，更喜欢独处", val: {sour: 9, savory: 3}}] },
+        { q: "压力爆表时，你会怎么解压？", opts: [{t: "狂吃甜品或奶茶，用糖分麻痹", val: {sweet: 8}}, {t: "去吃一顿爆辣火锅，大哭大笑", val: {spicy: 8}}, {t: "喝杯冰美式，一个人去散步吹风", val: {savory: 5, sour: 6}}, {t: "下厨煮一碗热汤面，回归平静", val: {savory: 8, sweet: 2}}] },
+        { q: "别人对你的第一印象通常是？", opts: [{t: "温和好亲近，没有攻击性", val: {sweet: 9}}, {t: "热情开朗，能量很足", val: {spicy: 9}}, {t: "有点高冷或者有距离感", val: {sour: 8, savory: 2}}, {t: "靠谱、成熟、情绪稳定", val: {savory: 9}}] },
+        { q: "在人际交往中，你更看重什么？", opts: [{t: "能不能玩到一块去", val: {spicy: 7, sweet: 3}}, {t: "能不能提供情绪价值", val: {sweet: 9}}, {t: "有没有边界感，不互相干涉", val: {sour: 9}}, {t: "能不能一起面对现实问题", val: {savory: 9}}] },
+        { q: "如果把你比作一份早餐，你最像？", opts: [{t: "精致的松饼配奶油", val: {sweet: 8}}, {t: "加满肉的煎饼果子", val: {spicy: 5, savory: 7}}, {t: "黑咖啡配全麦贝果", val: {savory: 8, sour: 2}}, {t: "清粥小菜，舒服养胃", val: {sweet: 4, savory: 6}}] },
+        { q: "遇到喜欢的人，你的反应更偏向？", opts: [{t: "直球出击，藏不住喜欢", val: {spicy: 9}}, {t: "默默暗恋，对ta无限温柔", val: {sweet: 9}}, {t: "试探拉扯，保持一点酷感", val: {sour: 8}}, {t: "顺其自然，先看合不合适", val: {savory: 9}}] },
+        { q: "哪种饮品最像你的日常精神状态？", opts: [{t: "全糖草莓奶茶", val: {sweet: 9}}, {t: "冰镇碳酸气泡水", val: {spicy: 9}}, {t: "加冰的柠檬茶", val: {sour: 8, spicy: 2}}, {t: "温热的乌龙茶或美式", val: {savory: 8, sour: 2}}] },
+        { q: "朋友伤心难过时，你通常怎么做？", opts: [{t: "用幽默和搞笑转移ta的注意力", val: {spicy: 7, sweet: 3}}, {t: "给ta一个拥抱，陪着ta一起哭", val: {sweet: 9}}, {t: "帮ta理性分析，寻找解决方案", val: {savory: 8}}, {t: "什么都不说，默默给ta买好吃的", val: {sweet: 5, savory: 5}}] },
+        { q: "对于“计划”和“随性”，你是？", opts: [{t: "必须做计划，按部就班有安全感", val: {savory: 9}}, {t: "大体有个方向，随机应变", val: {spicy: 5, sour: 4}}, {t: "走到哪算哪，充满惊喜", val: {spicy: 9}}, {t: "别人的计划就是我的计划", val: {sweet: 8, savory: 2}}] },
+        { q: "你最不能忍受哪种人？", opts: [{t: "冷暴力或者态度冷漠的人", val: {sweet: 8, spicy: 2}}, {t: "磨磨唧唧、负能量爆棚的人", val: {spicy: 8}}, {t: "没有分寸感、喜欢越界的人", val: {sour: 9}}, {t: "不切实际、光说不做的人", val: {savory: 9}}] },
+        { q: "你更喜欢哪种口感的食物？", opts: [{t: "软糯拉丝，入口即化", val: {sweet: 8}}, {t: "酥脆爆汁，口感强烈", val: {spicy: 8}}, {t: "清爽多汁，解腻", val: {sour: 8}}, {t: "扎实耐嚼，越嚼越香", val: {savory: 9}}] },
+        { q: "在一个群体中，你最害怕发生什么？", opts: [{t: "气氛冷场，大家都不说话", val: {spicy: 8}}, {t: "有人被孤立或者受委屈", val: {sweet: 9}}, {t: "自己没有私人空间", val: {sour: 9}}, {t: "任务搞砸，无法推进", val: {savory: 9}}] },
+        { q: "你在周末更想去的餐厅是？", opts: [{t: "网红甜品店，拍照好看", val: {sweet: 8}}, {t: "热闹的夜市大排档", val: {spicy: 8}}, {t: "安静的独立咖啡馆", val: {sour: 5, savory: 4}}, {t: "老字号的家常菜馆", val: {savory: 9}}] },
+        { q: "用一句话总结你的生活态度？", opts: [{t: "开心最重要，及时行乐", val: {sweet: 4, spicy: 6}}, {t: "温柔坚定，慢慢成长", val: {sweet: 8}}, {t: "保持清醒，热爱自由", val: {sour: 9}}, {t: "脚踏实地，稳中求胜", val: {savory: 9}}] }
+    ];
+
+    const foods = [
+        { name: "🍰 提拉米苏", dim: {sweet: 8, spicy: 2, sour: 3, savory: 5}, tags: ["温柔治愈", "共情力强", "微苦后甜"], text: "✨ <strong>【你的性格】</strong> 你是一个极其温柔、包容度很高的人。在朋友眼里，你就像提拉米苏一样，有一层绵密的奶油（亲和力）打底，又带着咖啡的微苦（理智与故事感）。你不喜欢张扬，但每次和你相处，大家都会觉得非常舒服。你擅长倾听，能够很好地共情他人的情绪。<br><br>💡 <strong>【隐藏反差】</strong> 虽然你看起来很好拿捏，其实你内心非常有底线。你偶尔的脆弱和敏感，就像撒在表面的可可粉，只有真正走进你心里的人才懂。<br><br>⚠️ <strong>【小缺点】</strong> 有时候太在意别人的感受，容易委屈自己；做决定时容易纠结。" },
+        { name: "🍲 麻辣火锅", dim: {sweet: 3, spicy: 9, sour: 1, savory: 7}, tags: ["社交悍匪", "热情直率", "人间清醒"], text: "🔥 <strong>【你的性格】</strong> 你就是行走的“小太阳”！性格直来直去，热情洋溢，完全不记仇。你的能量场极强，只要有你在，场子绝对不会冷。你包容度极高（就像火锅什么都能涮），跟谁都能迅速打成一片，是朋友局里不可或缺的核心人物。<br><br>💡 <strong>【隐藏反差】</strong> 别看平时大大咧咧，你其实是个极其真诚的人。你讨厌虚情假意，对认定的朋友会掏心掏肺。<br><br>⚠️ <strong>【小缺点】</strong> 情绪来得快去得也快，偶尔容易冲动；脾气上来的时候有点小暴躁。" },
+        { name: "🍋 冰镇柠檬气泡水", dim: {sweet: 4, spicy: 2, sour: 9, savory: 3}, tags: ["独立清醒", "边界感强", "灵魂有趣"], text: "🌱 <strong>【你的性格】</strong> 你像柠檬气泡水一样，清醒、独立、带点小酸爽。你不喜欢随波逐流，有自己独特的审美和想法。你十分看重私人空间，不喜欢过度社交，朋友不多但都是精挑细选的知己。你身上有一种清透的少年感/少女感。<br><br>💡 <strong>【隐藏反差】</strong> 虽然外表看着有点高冷或傲娇，但一旦有人和你频道对上了，你会展现出极其古灵精怪、甚至有点毒舌幽默的一面。<br><br>⚠️ <strong>【小缺点】</strong> 有时候太有主见，不太容易被说服；面对太热情的人会下意识想后退。" },
+        { name: "☕ 醇厚黑咖啡", dim: {sweet: 1, spicy: 2, sour: 4, savory: 9}, tags: ["成熟稳重", "理智脑", "外冷内热"], text: "🖤 <strong>【你的性格】</strong> 你是一个内核极其稳定、心智成熟的人。你就像一杯不加糖的黑咖啡，初尝可能觉得有些距离感，但越品越有味道。你做事有条理，分析问题一针见血，是团队或朋友圈里的“定海神针”。<br><br>💡 <strong>【隐藏反差】</strong> 表面上你好像什么都不在乎，其实你比谁都重感情。你只是不习惯表达情绪，总是把温柔藏在最深处，只给极其亲近的人看。<br><br>⚠️ <strong>【小缺点】</strong> 有时候过于清醒和理性，可能会让身边的人觉得你有点难接近或者缺乏浪漫。" },
+        { name: "🍞 法式脆法棍", dim: {sweet: 1, spicy: 3, sour: 4, savory: 9}, tags: ["硬核倔强", "有内涵", "不随波逐流"], text: "🥖 <strong>【你的性格】</strong> 你是一个极其有原则、甚至带点“硬骨头”的人。外表坚硬（法棍），但切开里面是柔软且充满气孔的。你不喜欢迎合别人，讨厌世俗的圆滑。你注重自身内涵的提升，是一个非常有精神追求的人。<br><br>💡 <strong>【隐藏反差】</strong> 虽然看着不好惹，但真正懂你的人会发现，你极其有趣且仗义，只要用对方法（比如蘸点热汤），你其实非常柔软。<br><br>⚠️ <strong>【小缺点】</strong> 有时候过于固执，撞了南墙也不回头；偶尔显得不太合群。" },
+        { name: "🥞 舒芙蕾松饼", dim: {sweet: 9, spicy: 1, sour: 2, savory: 2}, tags: ["极度柔软", "充满浪漫", "需要呵护"], text: "☁️ <strong>【你的性格】</strong> 你的灵魂是软绵绵的，充满了粉红色的泡泡。你天真、善良，对世界充满幻想。你极其需要被肯定、被爱护。你不仅爱浪漫，也常常能给别人制造浪漫和惊喜，是朋友圈里的“小甜心”。<br><br>💡 <strong>【隐藏反差】</strong> 别看你像个瓷娃娃，其实你对待爱的人有无限的能量，愿意付出一切去治愈对方。<br><br>⚠️ <strong>【小缺点】</strong> 情绪容易波动，有点容易“内耗”；面对现实的打击时，抗压能力稍弱。" },
+        { name: "🍗 灵魂炸鸡", dim: {sweet: 3, spicy: 6, sour: 2, savory: 8}, tags: ["快乐源泉", "真实接地气", "直性子"], text: "🍻 <strong>【你的性格】</strong> 你就是朋友们最爱的“开心果”！你真实、接地气，一点都不做作。开心了吃顿炸鸡，难过了也吃顿炸鸡。你拥有极其强大的生命力，甚至有一点点“疯感”。和你在一起，不需要任何伪装，轻轻松松就能获得快乐。<br><br>💡 <strong>【隐藏反差】</strong> 表面上没心没肺，其实心里门儿清，只是选择不把世界看得太复杂。<br><br>⚠️ <strong>【小缺点】</strong> 有时候有点三分钟热度，而且很难抗拒诱惑哦。" },
+        { name: "🍵 抹茶拿铁", dim: {sweet: 6, spicy: 1, sour: 3, savory: 7}, tags: ["慢热佛系", "内敛坚韧", "有韧性"], text: "🍃 <strong>【你的性格】</strong> 你是一个“慢热”的人。刚接触时，你像抹茶一样带着微微的苦涩和清冷（佛系、不爱社交），但一旦熟络，你奶香浓郁、温柔细腻的一面就会彻底展露。你对生活有自己的节奏，不慌不忙。<br><br>💡 <strong>【隐藏反差】</strong> 看似随遇而安，其实你内心非常倔强。一旦认准了一件事，你会默默坚持很久。<br><br>⚠️ <strong>【小缺点】</strong> 适应新环境或者新圈子比较慢；有时候太被动了，容易错过一些机会。" },
+        { name: "🍓 草莓大福", dim: {sweet: 9, spicy: 2, sour: 3, savory: 1}, tags: ["甜妹/暖男", "亲和力MAX", "没有攻击性"], text: "🌸 <strong>【你的性格】</strong> 你简直是“人间小天使”。外表白白软软，内心藏着一颗酸甜鲜活的草莓（有趣的灵魂）。你极度好相处，脾气超级好，从不会让人尴尬。你天生带有着一种讨喜的魔力，是长辈和同龄人都喜欢的类型。<br><br>💡 <strong>【隐藏反差】</strong> 虽然看起来软糯，但内心其实很有分寸感，清楚自己喜欢什么、讨厌什么。<br><br>⚠️ <strong>【小缺点】</strong> 有时候为了维护表面的和谐，会习惯性地选择妥协或讨好。" },
+        { name: "🦞 麻辣小龙虾", dim: {sweet: 2, spicy: 8, sour: 2, savory: 8}, tags: ["社交牛逼症", "享受当下", "反差萌"], text: "🍻 <strong>【你的性格】</strong> 没有一顿小龙虾解决不了的事。你是一个极其有生活情趣的人，懂得享受生活。你不拘小节，喜欢热热闹闹的氛围。你剥虾的技术一定很好（动手能力强），总是能把平淡的日子过得有声有色。<br><br>💡 <strong>【隐藏反差】</strong> 吃完小龙虾的你，卸下外壳，其实内心很细腻，也会害怕孤单，很需要有人懂你的言外之意。<br><br>⚠️ <strong>【小缺点】</strong> 嘴巴太快，有时候说话不过脑子容易伤人；偶尔有点小败家。" },
+        { name: "🥥 生椰拿铁", dim: {sweet: 6, spicy: 3, sour: 5, savory: 6}, tags: ["潮流达人", "平衡大师", "表面佛系"], text: "🥤 <strong>【你的性格】</strong> 你是一个各方面都很平衡的人。像生椰拿铁一样，既有咖啡的现实与清醒，又有椰乳的浪漫与柔软。你很懂现在流行的趋势，人际交往中既不会太锋芒毕露，也不会显得毫无存在感。<br><br>💡 <strong>【隐藏反差】</strong> 表面上你是个很随和的“端水大师”，其实内心有自己的小骄傲和独特的倔强。<br><br>⚠️ <strong>【小缺点】</strong> 有时候想得太多，容易在几个选项之间反复横跳、纠结不定。" },
+        { name: "🍷 热红酒", dim: {sweet: 6, spicy: 4, sour: 7, savory: 5}, tags: ["浪漫至死", "微醺感", "文艺青年"], text: "🌹 <strong>【你的性格】</strong> 你像一个有故事的电影角色。你注重仪式感，骨子里是个绝对的浪漫主义者。你喜欢微醺的状态，对艺术、文学或某种小众爱好有着极高的热情。你的品味很好，总能发现生活中别人注意不到的美。<br><br>💡 <strong>【隐藏反差】</strong> 虽然看起来充满感性和梦幻，但在大是大非面前，你其实非常果敢和清醒。<br><br>⚠️ <strong>【小缺点】</strong> 情绪比较容易受环境（比如天气、音乐）的影响，偶尔显得有点多愁善感。" }
+    ];
+
+    let currentIdx = 0;
+    let scores = { sweet: 0, spicy: 0, sour: 0, savory: 0 };
+    let baseTestCount = 7825; // 初始测试人数
+
+    function init() { document.getElementById('q-total').innerText = questions.length; }
+
+    function startQuiz() {
+        document.getElementById('page-cover').classList.remove('active');
+        document.getElementById('page-quiz').classList.add('active');
+        currentIdx = 0;
+        for (let k in scores) scores[k] = 0;
+        renderQ();
+    }
+
+    function renderQ() {
+        if (currentIdx >= questions.length) { calcResult(); return; }
+        const q = questions[currentIdx];
+        document.getElementById('q-current').innerText = currentIdx + 1;
+        document.getElementById('question-text').innerText = q.q;
+        document.getElementById('progress-fill').style.width = (currentIdx / questions.length * 100) + '%';
+        
+        const box = document.getElementById('options-container');
+        box.innerHTML = '';
+        // 打乱选项
+        const shuffled = q.opts.sort(() => Math.random() - 0.5);
+        shuffled.forEach(opt => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.innerText = opt.t;
+            div.onclick = () => selectOpt(div, opt.val);
+            box.appendChild(div);
+        });
+    }
+
+    function selectOpt(el, val) {
+        if (document.getElementById('options-container').classList.contains('lock')) return;
+        document.getElementById('options-container').classList.add('lock');
+        
+        document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+
+        for (let k in val) { if (scores[k] !== undefined) scores[k] += val[k]; }
+
+        setTimeout(() => {
+            document.getElementById('options-container').classList.remove('lock');
+            currentIdx++;
+            renderQ();
+        }, 250);
+    }
+
+    function calcResult() {
+        document.getElementById('page-quiz').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+
+        let nowCount = baseTestCount + Math.floor(Math.random() * 5) + 1;
+        document.getElementById('test-count-badge').innerText = `🎉 你是第 ${nowCount} 个测出灵魂食物的人`;
+
+        // 归一化用户的分数
+        let userVec = {};
+        let max = Math.max(...Object.values(scores));
+        for (let k in scores) userVec[k] = (scores[k] / (max || 1)) * 10; 
+
+        let bestFood = null;
+        let minDist = Infinity;
+
+        foods.forEach(food => {
+            let dist = 0;
+            for (let k in userVec) {
+                dist += Math.abs(userVec[k] - food.dim[k]);
+            }
+            if (dist < minDist) { minDist = dist; bestFood = food; }
+        });
+
+        document.getElementById('res-name').innerText = bestFood.name;
+        const tagBox = document.getElementById('res-tags');
+        tagBox.innerHTML = '';
+        bestFood.tags.forEach(t => {
+            const s = document.createElement('span');
+            s.className = 'tag';
+            s.innerText = '#' + t;
+            tagBox.appendChild(s);
+        });
+        document.getElementById('res-content').innerHTML = bestFood.text;
+    }
+
+    function restartQuiz() {
+        document.getElementById('page-result').classList.remove('active');
+        document.getElementById('page-cover').classList.add('active');
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
